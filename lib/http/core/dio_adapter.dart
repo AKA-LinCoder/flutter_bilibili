@@ -6,8 +6,9 @@ import 'package:flutter_bilibili/http/request/base_request.dart';
 class DioAdapter extends LinNetAdapter{
   @override
   Future<LinNetResponse<T>> send<T>(BaseRequest request) async {
-    var response, options = Options(headers: request.header);
-    var error;
+    Response? response;
+    var options = Options(headers: request.header);
+    DioError? error;
     try {
       if (request.httpMethod() == HttpMethod.GET) {
         response = await Dio().get(request.url(), options: options);
@@ -31,12 +32,12 @@ class DioAdapter extends LinNetAdapter{
   }
 
   ///构建LinNetResponse
-  LinNetResponse buildRes(Response response, BaseRequest request) {
-    return LinNetResponse<T>(
-        data: response.data,
+  LinNetResponse buildRes(Response? response, BaseRequest request) {
+    return LinNetResponse(
+        data: response?.data,
         request: request,
-        statusCode: response.statusCode,
-        statusMessage: response.statusMessage,
+        statusCode: response?.statusCode,
+        statusMessage: response?.statusMessage,
         extra: response);
   }
   
