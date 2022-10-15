@@ -5,7 +5,7 @@ import 'package:flutter_bilibili/http/request/base_request.dart';
 
 class DioAdapter extends LinNetAdapter{
   @override
-  Future<LinNetResponse<T>> send<T>(BaseRequest request) async {
+  Future<LinNetResponse<dynamic>> send<T>(BaseRequest request) async {
     Response? response;
     var options = Options(headers: request.header);
     DioError? error;

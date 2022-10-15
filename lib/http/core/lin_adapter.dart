@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter_bilibili/http/request/base_request.dart';
 ///网络请求抽象类
 abstract class LinNetAdapter{
-  Future<LinNetResponse<T>> send<T>(BaseRequest request);
+  Future<LinNetResponse<dynamic>> send<T>(BaseRequest request);
 }
 
 
@@ -11,7 +11,7 @@ abstract class LinNetAdapter{
 ///统一网络层返回格式
 class LinNetResponse<T>{
   LinNetResponse({this.data, this.request, this.statusCode, this.statusMessage, this.extra});
-  T? data;
+  dynamic data;
   BaseRequest? request;
   int? statusCode;
   String? statusMessage;

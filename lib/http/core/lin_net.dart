@@ -62,7 +62,7 @@ class LinNet {
     throw hiError;
   }
 
-  Future<LinNetResponse<T>> send<T>(BaseRequest request) async {
+  Future<LinNetResponse<dynamic>> send<T>(BaseRequest request) async {
     ///使用Dio发送请求
     LinNetAdapter adapter = DioAdapter();
     return adapter.send(request);
