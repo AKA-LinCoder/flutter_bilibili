@@ -64,7 +64,11 @@ class LinNet {
 
   Future<LinNetResponse<dynamic>> send<T>(BaseRequest request) async {
     ///使用Dio发送请求
+    print('url:${request.url()}');
+    print('method:${request.httpMethod()}');
+    print('header:${request.header}');
     LinNetAdapter adapter = DioAdapter();
+    // LinAdapter adapter = MockAdapter();
     return adapter.send(request);
   }
 
