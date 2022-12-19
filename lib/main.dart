@@ -157,6 +157,7 @@ class BiliRouteDelegate extends RouterDelegate<BiliRoutePath> with ChangeNotifie
           // 通知路由发生变化
           LinNavigator.getInstance().notify(pages, tempPages);
           return true;
+
         },
       ),
     );

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bilibili/model/test_model.dart';
+import 'package:flutter_bilibili/navigator/lin_navigator.dart';
 /// FileName home_page
 ///
 /// @Author LinGuanYu
@@ -140,6 +141,32 @@ class _HomePageState extends State<HomePage> {
       ]
     }
   };
+
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    LinNavigator.getInstance().addListener((current, pre){
+      print("current:${current.page}");
+      print("pre:${pre?.page}");
+      if(widget == current.page||current.page is HomePage){
+        print("当前页面被打开 onResume");
+      }else if(widget == pre?.page||pre?.page is HomePage){
+        print("首页 onPause");
+      }
+
+    });
+  }
+
+  @override
+  void dispose() {
+    // LinNavigator.getInstance().removeListener((this.)
+    // TODO: implement dispose
+    super.dispose();
+
+  }
+
 
 
   @override
