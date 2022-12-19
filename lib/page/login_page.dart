@@ -10,6 +10,7 @@ import '../widgets/login_button.dart';
 import '../widgets/login_effect.dart';
 import '../widgets/login_input.dart';
 
+/// 登录页
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
 
@@ -17,110 +18,87 @@ class LoginPage extends StatefulWidget {
   _LoginPageState createState() => _LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage>
-    with AutomaticKeepAliveClientMixin {
+class _LoginPageState extends State<LoginPage> {
+  /// 是否保护
   bool protect = false;
+
+  /// 按钮是否可点击
   bool loginEnable = false;
 
+  /// 用户名
   String? userName;
+
+  /// 密码
   String? password;
 
-  var images = [
-    "http://192.168.0.148/group1/M00/00/0A/wKgANWDe0LGAewgnAF5GQAtUJ1Y217.jpg",
-    "http://192.168.0.148/group1/M00/00/0A/wKgANWDe0IGAAYUpAF7idru_08o608.jpg",
-    "http://192.168.0.148/group1/M00/00/0A/wKgANWDe0OOASGHYAGXEc3p3ETU453.jpg",
-    "http://192.168.0.148/group1/M00/00/0A/wKgANWDe0IKAF2pTAGDhcNPrhy8397.jpg",
-    "http://192.168.0.148/group1/M00/00/0A/wKgANWDe0LGAVmwuAFG25I8Ak20843.jpg",
-    "http://192.168.0.148/group1/M00/00/0A/wKgANWDe0LKAHdfTAGBxz6Ipkxs014.jpg",
-  ];
-
-  List<Widget> Item(List<String> files) {
-    return List.generate(files.length, (index) {
-      return GestureDetector(
-        onTap: () {
-          // Navigator.push(
-          //     context,
-          //     MaterialPageRoute(
-          //         builder: (_) => PhotoPreview(
-          //               galleryItems: [files[index]],
-          //               defaultImage: index,
-          //             )));
-        },
-        child: Container(
-          width: 50,
-          height: 50,
-          alignment: Alignment.center,
-          child: CachedNetworkImage(
-            filterQuality: FilterQuality.none,
-            imageUrl: files[index],
-            placeholder: (context, url) => CircularProgressIndicator(),
-            // errorWidget: (context, url, error) => Icon(Icons.error),
-          ),
-          // child: FadeInImage.assetNetwork(placeholder: "images/logo.png", image: files[index]),
-        ),
-      );
+  /// 设置登录按钮
+  void checkInput() {
+    bool enable;
+    if (isNotEmpty(userName) && isNotEmpty(password)) {
+      enable = true;
+    } else {
+      enable = false;
+    }
+    setState(() {
+      loginEnable = enable;
     });
+  }
+
+  /// 登录
+  void send() async {
+    try {
+      ///username:18404969231
+      ///password:wkl123456
+      var result = await LoginDao.login(userName!, password!);
+      if (result['code'] == 0) {
+        showToast('登录成功');
+        // LinNavigator.getInstance().onJumpTo(RouteStatus.home);
+      } else {
+        showWarnToast(result['msg']);
+      }
+    } on NeedAuth catch (e) {
+      showWarnToast(e.message);
+    } on LinNetError catch (e) {
+      showWarnToast(e.message);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    // return Scaffold(
-    //   appBar: AppBar(
-    //     title: Text('images'),
-    //   ),
-    //   body: SingleChildScrollView(
-    //     child: Padding(
-    //       padding: EdgeInsets.all(8),
-    //       child: Container(
-    //         width: double.infinity,
-    //         child: ListView(
-    //           shrinkWrap: true,
-    //           children: Item(images),
-    //         ),
-    //         // child: Wrap(
-    //         //   spacing: 5,
-    //         //   runSpacing: 5,
-    //         //   children: Item(images),
-    //         // ),
-    //       ),
-    //     ),
-    //   ),
-    // );
-
     return Scaffold(
-      appBar: appBar("登录", "注册", () {}),
+      appBar: appBar('密码登录', '注册', () {
+        // LinNavigator.getInstance().onJumpTo(RouteStatus.registration);
+      }, key: const Key('registration')),
       body: Container(
         child: ListView(
           children: [
             LoginEffect(protect: protect),
             LoginInput(
-              title: "用户名",
-              hint: "请输入用户名",
+              title: '用户名',
+              hint: '请输入用户',
               onChanged: (text) {
                 userName = text;
                 checkInput();
               },
             ),
             LoginInput(
-              title: "密码",
-              hint: "请输入密码",
+              title: '密码',
               obscureText: true,
-              focusChanged: (focus) {
-                setState(() {
-                  protect = focus;
-                });
-              },
               onChanged: (text) {
                 password = text;
                 checkInput();
               },
+              focusChanged: (focus) {
+                setState(() {
+                  protect = focus;
+                });
+              }, hint: '请输入密码',
             ),
             Padding(
-              padding: const EdgeInsets.only(left: 20, top: 20, right: 20),
+              padding: const EdgeInsets.only(top: 20, left: 20, right: 20),
               child: LoginButton(
-                title: '登录',
-                onPressed: send,
                 enable: loginEnable,
+                onPressed: send, title: '登录',
               ),
             ),
           ],
@@ -128,44 +106,4 @@ class _LoginPageState extends State<LoginPage>
       ),
     );
   }
-
-  void checkInput() {
-    bool enable = false;
-    if (isNotEmpty(userName) && isNotEmpty(password)) {
-      enable = true;
-    }
-
-    setState(() {
-      loginEnable = enable;
-    });
-  }
-
-  void send() async {
-    var testStandard = ("FCI70 2").replaceAll(RegExp(r"\s+\b|\b\s"), "");
-    testStandard = testStandard.replaceAll(RegExp("-"), "");
-    print('这是来自维修任务的试压标准$testStandard');
-
-    try {
-      var res = await LoginDao.login(userName!, password!);
-      print(res);
-      if (res["code"] == 200) {
-        showToast("登录成功");
-      } else {
-        showWarnToast(res['message']);
-      }
-    } on NeedAuth catch (e) {
-      print('这是error1:${e.data}');
-      showWarnToast(e.message);
-    } on LinNetError catch (e) {
-      print('这是error2:${e.data}');
-      showWarnToast(e.message);
-    } catch (e) {
-      print('这是error3:${e.toString()}');
-      showWarnToast(e.toString());
-    }
-  }
-
-  @override
-  // TODO: implement wantKeepAlive
-  bool get wantKeepAlive => true;
 }

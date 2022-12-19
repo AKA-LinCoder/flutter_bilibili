@@ -15,6 +15,7 @@ class LoginButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    ///填满整个宽度
     return FractionallySizedBox(
       widthFactor: 1,
       child: MaterialButton(
@@ -25,7 +26,7 @@ class LoginButton extends StatelessWidget {
         color: primary,
         child: Text(
           title,
-          style: TextStyle(color: Colors.white, fontSize: 16),
+          style: const TextStyle(color: Colors.white, fontSize: 16),
         ),
       ),
     );
