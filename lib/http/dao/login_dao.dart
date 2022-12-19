@@ -43,6 +43,7 @@ class LoginDao {
 
   /// 获取登录令牌
   static String? getBoardingPass() {
+    print("获取到的本地数据${LinCache.getInstance().get(BOARDING_PASS)}");
     return LinCache.getInstance().get(BOARDING_PASS);
   }
 }

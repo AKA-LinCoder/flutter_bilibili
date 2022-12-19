@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../http/core/lin_error.dart';
 import '../http/dao/login_dao.dart';
+import '../navigator/lin_navigator.dart';
 import '../utils/string_util.dart';
 import '../utils/toast_util.dart';
 import '../widgets/appbar.dart';
@@ -52,7 +53,8 @@ class _LoginPageState extends State<LoginPage> {
       var result = await LoginDao.login(userName!, password!);
       if (result['code'] == 0) {
         showToast('登录成功');
-        // LinNavigator.getInstance().onJumpTo(RouteStatus.home);
+        ///跳转到首页
+        LinNavigator.getInstance().onJumpTo(RouteStatus.home);
       } else {
         showWarnToast(result['msg']);
       }
@@ -67,7 +69,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: appBar('密码登录', '注册', () {
-        // LinNavigator.getInstance().onJumpTo(RouteStatus.registration);
+        LinNavigator.getInstance().onJumpTo(RouteStatus.registration);
       }, key: const Key('registration')),
       body: Container(
         child: ListView(
