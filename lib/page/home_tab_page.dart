@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../model/home_model.dart';
+import '../widgets/lin_banner.dart';
 
 /// FileName home_tab_page
 ///
@@ -24,10 +25,30 @@ class HomeTabPage extends StatefulWidget {
 }
 
 class _HomeTabPageState extends State<HomeTabPage> {
+
+
+  /// 轮播图
+  _banner(List<BannerModel> bannerList) {
+    return LinBanner(
+      bannerList,
+      padding: EdgeInsets.only(left: 5, right: 5),
+    );
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: Text(widget.categoryName),
+      child: Column(
+        children: [
+          if (widget.bannerList != null)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: _banner(widget.bannerList!),
+            ),
+          Text(widget.categoryName),
+        ],
+      ),
     );
   }
 }
