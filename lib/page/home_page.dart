@@ -5,12 +5,14 @@ import 'package:flutter_bilibili/page/home_tab_page.dart';
 import 'package:flutter_bilibili/utils/colors.dart';
 import 'package:flutter_bilibili/utils/lin_state.dart';
 import 'package:flutter_bilibili/widgets/loading_container.dart';
+import 'package:flutter_bilibili/widgets/navigation_bar.dart';
 import 'package:underline_indicator/underline_indicator.dart';
 
 import '../http/core/lin_error.dart';
 import '../http/dao/home_dao.dart';
 import '../model/home_model.dart';
 import '../utils/toast_util.dart';
+import '../widgets/view_uilt.dart';
 
 /// FileName home_page
 ///
@@ -109,7 +111,7 @@ class _HomePageState extends LinState<HomePage> with TickerProviderStateMixin,Au
     // 从后台切换前台，界面可见
       case AppLifecycleState.resumed:
       // fix Android 压后台首页状态栏字体颜色变白，详情页状态栏字体变黑问题
-      //   changeStatusBar();
+        changeStatusBar();
         break;
     // 界面不可见，后台
       case AppLifecycleState.paused:
@@ -130,9 +132,14 @@ class _HomePageState extends LinState<HomePage> with TickerProviderStateMixin,Au
         isLoading: _isLoading,
         child: Column(
           children: [
-            Container(
+             LinNavigationBar(
+              child: _appBar(),
+              height: 50,
               color: Colors.white,
-              padding: const EdgeInsets.only(top: 50),
+              statusStyle: StatusStyle.DARK_CONTENT,
+            ),
+            Container(
+              decoration: bottomBoxShadow(context),
               child: _tabBar(),
             ),
             Flexible(child: TabBarView(
@@ -148,6 +155,69 @@ class _HomePageState extends LinState<HomePage> with TickerProviderStateMixin,Au
       ),
     );
   }
+
+  /// appBar
+  Widget _appBar() {
+    return Padding(
+      padding: const EdgeInsets.only(left: 15, right: 15),
+      child: Row(
+        children: [
+          InkWell(
+            onTap: () {
+              if (widget.onJumpTo != null) {
+                widget.onJumpTo!(3);
+              }
+            },
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(23),
+              child: const Image(
+                height: 46,
+                width: 46,
+                image: AssetImage('images/avatar.png'),
+              ),
+            ),
+          ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(left: 15, right: 15),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: Container(
+                  padding: const EdgeInsets.only(left: 10),
+                  height: 32,
+                  alignment: Alignment.centerLeft,
+                  child: const Icon(Icons.search, color: Colors.grey),
+                  decoration: BoxDecoration(color: Colors.grey[100]),
+                ),
+              ),
+            ),
+          ),
+          InkWell(
+            onTap: () {
+              // _mockCrash();
+            },
+            child: const Icon(
+              Icons.explore_outlined,
+              color: Colors.grey,
+            ),
+          ),
+          InkWell(
+            onTap: () {
+              LinNavigator.getInstance().onJumpTo(RouteStatus.notice);
+            },
+            child: const Padding(
+              padding: EdgeInsets.only(left: 12),
+              child: Icon(
+                Icons.mail_outline,
+                color: Colors.grey,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
 
   _tabBar() {
     return TabBar(
