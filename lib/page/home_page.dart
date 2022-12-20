@@ -3,7 +3,14 @@ import 'package:flutter_bilibili/model/test_model.dart';
 import 'package:flutter_bilibili/navigator/lin_navigator.dart';
 import 'package:flutter_bilibili/page/home_tab_page.dart';
 import 'package:flutter_bilibili/utils/colors.dart';
+import 'package:flutter_bilibili/utils/lin_state.dart';
+import 'package:flutter_bilibili/widgets/loading_container.dart';
 import 'package:underline_indicator/underline_indicator.dart';
+
+import '../http/core/lin_error.dart';
+import '../http/dao/home_dao.dart';
+import '../model/home_model.dart';
+import '../utils/toast_util.dart';
 
 /// FileName home_page
 ///
@@ -21,15 +28,28 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
-  late TabController tabController;
-  var tabs = ["推荐", "热门", "追番", "影视", "搞笑", "日常", "综合", "手机游戏", "配音"];
+class _HomePageState extends LinState<HomePage> with TickerProviderStateMixin,AutomaticKeepAliveClientMixin,WidgetsBindingObserver {
+  TabController? tabController;
+  /// 类别列表
+  List<CategoryModel> categoryList = [];
+
+  /// 轮播图列表
+  List<BannerModel> bannerList = [];
+
+
+  /// 加载状态
+  bool _isLoading = true;
+
+  /// 缓存页面
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    tabController = TabController(length: tabs.length, vsync: this);
+    WidgetsBinding.instance?.addObserver(this);
+    tabController = TabController(length:  categoryList.length, vsync: this);
     LinNavigator.getInstance().addListener((current, pre) {
       print("current:${current.page}");
       print("pre:${pre?.page}");
@@ -39,40 +59,101 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         print("首页 onPause");
       }
     });
+    loadData();
+  }
+
+  /// 加载数据
+  void loadData() async {
+    try {
+      HomeModel res = await HomeDao.get('推荐');
+
+      setState(() {
+        if (res.categoryList != null) {
+          tabController =
+              TabController(length: res.categoryList?.length ?? 0, vsync: this);
+        }
+        categoryList = res.categoryList ?? [];
+        bannerList = res.bannerList ?? [];
+        _isLoading = false;
+      });
+    } on NeedAuth catch (e) {
+      showWarnToast(e.message);
+      setState(() {
+        _isLoading = false;
+      });
+    } on LinNetError catch (e) {
+      showWarnToast(e.message);
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   @override
   void dispose() {
+    tabController?.dispose();
+    WidgetsBinding.instance?.removeObserver(this);
     // LinNavigator.getInstance().removeListener((this.)
     // TODO: implement dispose
     super.dispose();
   }
 
+  /// 监听应用生命周期变化
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    switch (state) {
+    // 处于这种状态的应用程序应该假设它们可能在任何时候暂停。
+      case AppLifecycleState.inactive:
+        break;
+    // 从后台切换前台，界面可见
+      case AppLifecycleState.resumed:
+      // fix Android 压后台首页状态栏字体颜色变白，详情页状态栏字体变黑问题
+      //   changeStatusBar();
+        break;
+    // 界面不可见，后台
+      case AppLifecycleState.paused:
+        break;
+    // APP 结束时调用
+      case AppLifecycleState.detached:
+        break;
+    }
+  }
+
+
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
       // appBar: AppBar(),
-      body: Column(
-        children: [
-          Container(
-            color: Colors.white,
-            padding: const EdgeInsets.only(top: 50),
-            child: _tabBar(),
-          ),
-          Flexible(child: TabBarView(
-            controller: tabController,
-            children: tabs.map((e) => HomeTabPage(name: e)).toList(),
-          ))
-        ],
+      body: LoadingContainer(
+        isLoading: _isLoading,
+        child: Column(
+          children: [
+            Container(
+              color: Colors.white,
+              padding: const EdgeInsets.only(top: 50),
+              child: _tabBar(),
+            ),
+            Flexible(child: TabBarView(
+              controller: tabController,
+              ///只有第一个需要展示轮播图
+              children: categoryList.map((tab) => HomeTabPage(
+                categoryName: tab.name,
+                bannerList: tab.name == '推荐' ? bannerList : null,
+              )).toList(),
+            ))
+          ],
+        ),
       ),
     );
   }
 
   _tabBar() {
     return TabBar(
-      tabs: tabs.map<Tab>((e) => Tab(child: Padding(
+      tabs: categoryList.map<Tab>((e) => Tab(child: Padding(
         padding: EdgeInsets.zero,
-        child: Text(e),
+        child: Text(e.name),
       ),)).toList(),
       controller: tabController,
       isScrollable: true,
